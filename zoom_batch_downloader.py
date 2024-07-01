@@ -1,3 +1,4 @@
+import argparse
 import datetime
 import math
 import os
@@ -8,23 +9,61 @@ from types import ModuleType
 import colorama
 from colorama import Fore, Style
 
-import utils
-from zoom_client import zoom_client
+import lib.urls as urls
+import lib.utils as utils
+from lib.zoom_client import zoom_client
 
 colorama.init()
 
-try:
-	import config as CONFIG
-except ImportError:
-	utils.print_bright_red('Missing config file, copy config_template.py to config.py and change as needed.')
+def get_parser():
+	parser = argparse.ArgumentParser(description="Zoom Batch Downloader - See the README.")
+	parser.add_argument(
+		'--config', '-c', nargs='+',
+		help='List of configuration files. Later configuration files override earlier ones on a value by value basis.'
+	)
+	return parser
 
-client = zoom_client(
-	account_id=CONFIG.ACCOUNT_ID, client_id=CONFIG.CLIENT_ID, client_secret=CONFIG.CLIENT_SECRET
-)
+def setup_config():
+	args = get_parser().parse_args()
+	configs = args.config
+
+	if configs is not None and len(configs) > 0:
+		try:
+			utils.merge_modules(configs, 'config')
+		except Exception as error:
+			if utils.is_debug():
+				raise
+			utils.print_bright_red(f'Error: {error}')
+			exit(1)
+
+
+def create_zoom_client():
+	return zoom_client(
+		credentials=CONFIG.CREDENTIALS,
+		refresh_tokens_path=CONFIG.REFRESH_TOKENS_PATH,
+		use_oauth_server=CONFIG.REFRESH_TOKENS_PATH,
+		oauth_port=CONFIG.OAUTH_PORT,
+		oauth_timeout=CONFIG.USER_INPUT_TIMEOUT,
+		verbose_output=CONFIG.VERBOSE_OUTPUT
+	)
+
+if __name__ == '__main__':
+	setup_config()
+	try:
+		import config as CONFIG
+	except ImportError:
+		utils.print_bright_red(
+			f'Missing config file, copy config_template.py to config.py and change as needed.\n'
+			f'Alternatively, you can provide custom config file(s) as an argument'
+		)
+		exit(1)
+
+	client = create_zoom_client()
 
 def main():
 	CONFIG.OUTPUT_PATH = utils.prepend_path_on_windows(CONFIG.OUTPUT_PATH)
 
+	utils.print_bright(f'Using {client.credentials_description()}.')
 	print_filter_warnings()
 
 	from_date = datetime.datetime(CONFIG.START_YEAR, CONFIG.START_MONTH, CONFIG.START_DAY or 1)
@@ -63,11 +102,9 @@ def get_users():
 		return [(email, '') for email in CONFIG.USERS]
 
 	utils.print_bright('Scanning for users:')
-	active_users_url = 'https://api.zoom.us/v2/users?status=active'
-	inactive_users_url = 'https://api.zoom.us/v2/users?status=inactive'
 	
 	users = []
-	pages = utils.chain(client.paginate(active_users_url), client.paginate(inactive_users_url))
+	pages = utils.chain(client.paginate(urls.active_users()), client.paginate(urls.inactive_users()))
 	for page in utils.percentage_tqdm(pages):
 			users.extend([(user['email'], get_user_name(user)) for user in page['users']]),
 
@@ -88,7 +125,6 @@ def download_recordings(users, from_date, to_date):
 
 	for user_email, user_name in users:
 		user_description = get_user_description(user_email, user_name)
-		user_host_folder = get_user_host_folder(user_email)
 
 		utils.print_bright(
 			f'Downloading recordings from user {user_description} - Starting at {date_to_str(from_date)} '
@@ -96,7 +132,7 @@ def download_recordings(users, from_date, to_date):
 		)
 	
 		meetings = get_meetings(get_meeting_uuids(user_email, from_date, to_date))
-		user_file_count, user_total_size, user_skipped_count = download_recordings_from_meetings(meetings, user_host_folder)
+		user_file_count, user_total_size, user_skipped_count = download_recordings_from_meetings(meetings, user_email)
 
 		utils.print_bright('######################################################################')
 		print()
@@ -109,12 +145,6 @@ def download_recordings(users, from_date, to_date):
 
 def get_user_description(user_email, user_name):
 	return f'{user_email} ({user_name})' if (user_name) else user_email
-
-def get_user_host_folder(user_email):
-	if CONFIG.GROUP_BY_USER:
-		return os.path.join(CONFIG.OUTPUT_PATH, user_email)
-	else:
-		return CONFIG.OUTPUT_PATH
 	
 def date_to_str(date):
 	return date.strftime('%Y-%m-%d')
@@ -131,12 +161,8 @@ def get_meeting_uuids(user_email, start_date, end_date):
 		while local_start_date <= end_date:
 			local_end_date = min(local_start_date + delta, end_date)
 
-			local_start_date_str = date_to_str(local_start_date)
-			local_end_date_str = date_to_str(local_end_date)
-			url = f'https://api.zoom.us/v2/users/{user_email}/recordings?from={local_start_date_str}&to={local_end_date_str}'
-			
 			ids = []
-			for page in client.paginate(url):
+			for page in client.paginate(urls.user_recordings(user_email, local_start_date, local_end_date)):
 				ids.extend([meeting['uuid'] for meeting in page['meetings']])
 
 			meeting_uuids.extend(reversed(ids))
@@ -151,12 +177,11 @@ def get_meetings(meeting_uuids):
 	if meeting_uuids:
 		utils.print_bright(f'Scanning for recordings:')
 		for meeting_uuid in utils.percentage_tqdm(meeting_uuids):
-			url = f'https://api.zoom.us/v2/meetings/{utils.double_encode(meeting_uuid)}/recordings'
-			meetings.append(client.get(url))
+			meetings.append(client.get(urls.meeting_recordings(meeting_uuid)))
 
 	return meetings
 
-def download_recordings_from_meetings(meetings, host_folder):
+def download_recordings_from_meetings(meetings, user_email):
 	file_count, total_size, skipped_count = 0, 0, 0
 
 	for meeting in meetings:
@@ -185,7 +210,7 @@ def download_recordings_from_meetings(meetings, host_folder):
 			) + '.' + ext
 			file_size = int(recording_file['file_size'])
 
-			if download_recording_file(url, host_folder, file_name, file_size, topic, recording_name):
+			if download_recording_file(url, user_email, file_name, file_size, topic, recording_name):
 				total_size += file_size
 				file_count += 1
 			else:
@@ -193,12 +218,12 @@ def download_recordings_from_meetings(meetings, host_folder):
 	
 	return file_count, total_size, skipped_count
 
-def download_recording_file(download_url, host_folder, file_name, file_size, topic, recording_name):
+def download_recording_file(download_url, user_email, file_name, file_size, topic, recording_name):
 	if CONFIG.VERBOSE_OUTPUT:
 		print()
 		utils.print_dim(f'URL: {download_url}')
 
-	file_path = create_path(host_folder, file_name, topic, recording_name)
+	file_path = create_path(user_email, file_name, topic, recording_name)
 
 	if os.path.exists(file_path) and abs(os.path.getsize(file_path) - file_size) <= CONFIG.FILE_SIZE_MISMATCH_TOLERANCE:
 		utils.print_dim(f'Skipping existing file: {file_name}')
@@ -208,7 +233,7 @@ def download_recording_file(download_url, host_folder, file_name, file_size, top
 		os.remove(file_path)
 
 	utils.print_bright(f'Downloading: {file_name}')
-	utils.wait_for_disk_space(file_size, CONFIG.OUTPUT_PATH, CONFIG.MINIMUM_FREE_DISK, interval=5)
+	utils.wait_for_disk_space(file_size, CONFIG.OUTPUT_PATH, CONFIG.MINIMUM_FREE_DISK, poll_interval=5)
 
 	tmp_file_path = file_path + '.tmp'
 	client.do_with_token(
@@ -222,13 +247,18 @@ def download_recording_file(download_url, host_folder, file_name, file_size, top
 
 	return True
 
-def create_path(host_folder, file_name, topic, recording_name):
-	folder_path = host_folder
+def create_path(user_email, file_name, topic, recording_name):
+	folder_path = CONFIG.OUTPUT_PATH
 
-	if CONFIG.GROUP_BY_TOPIC:
-		folder_path = os.path.join(folder_path, topic)
-	if CONFIG.GROUP_BY_RECORDING:
-		folder_path = os.path.join(folder_path, recording_name)
+	values = {
+		'USER': user_email,
+		'TOPIC': topic,
+		'RECORDING': recording_name
+	}
+
+	for property in CONFIG.GROUP_BY:
+		if property in values:
+			folder_path = os.path.join(folder_path, values[property])
 
 	os.makedirs(folder_path, exist_ok=True)
 	return os.path.join(folder_path, file_name)

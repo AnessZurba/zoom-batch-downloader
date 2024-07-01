@@ -1,12 +1,15 @@
+import json
 import math
 import os
 import re
 import shutil
 import sys
+import time
+import types
 import unicodedata
 import urllib
 from functools import reduce
-from json import dumps
+from importlib.machinery import SourceFileLoader
 from time import sleep
 
 from colorama import Fore, Style
@@ -55,7 +58,7 @@ def add_url_params(url, params):
 	# Bool and Dict values should be converted to json-friendly values
 	# you may throw this part away if you don't like it :)
 	parsed_get_args.update(
-		{k: dumps(v) for k, v in parsed_get_args.items()
+		{k: json.dumps(v) for k, v in parsed_get_args.items()
 		 if isinstance(v, (bool, dict))}
 	)
 
@@ -89,7 +92,7 @@ def slugify(value, allow_unicode=True):
 	value = re.sub(r'[^\w\s-]', '', value.lower())
 	return re.sub(r'[-\s]+', '-', value).strip('-_')
 
-def wait_for_disk_space(file_size, path, minimum_free_disk, interval):
+def wait_for_disk_space(file_size, path, minimum_free_disk, poll_interval, timeout):
 	file_size_str = size_to_string(file_size)
 
 	free_disk = shutil.disk_usage(path)[2]
@@ -97,6 +100,7 @@ def wait_for_disk_space(file_size, path, minimum_free_disk, interval):
 	required_disk_space_str = size_to_string(required_disk_space)
 
 	i = 0
+	start_time = time.time()
 	while free_disk < required_disk_space:
 		if i % 3 == 0:
 			free_disk_str = size_to_string(free_disk)
@@ -107,7 +111,9 @@ def wait_for_disk_space(file_size, path, minimum_free_disk, interval):
 				f'(File size: {file_size_str}, minimum free disk space: {minimum_free_disk_str}, '
 				f'available: {free_disk_str}/{required_disk_space_str})'
 			)
-		sleep(interval)
+		if timeout is not None and time.time() - start_time > timeout:
+			raise TimeoutError("Timeout waiting for disk space.")
+		sleep(poll_interval)
 		free_disk = shutil.disk_usage(path)[2]
 		i += 1
 
@@ -120,17 +126,20 @@ def size_to_string(size_bytes, separator = ''):
 	size = round(size_bytes / p, 2)
 	return str(size) + str(separator) + units[i]
 
-def print_bright_red(msg):
-	print_bright(Fore.RED + str(msg) + Fore.RESET)
+def print_bright_red(msg, end='\n'):
+	print_bright(Fore.RED + str(msg) + Fore.RESET, end=end)
 
-def print_bright(msg):
-	print(Style.BRIGHT + str(msg) + Style.RESET_ALL)
+def print_bright_blue(msg, end='\n'):
+	print_bright(Fore.BLUE + str(msg) + Fore.RESET, end=end)
 
-def print_dim_red(msg):
-	print_dim(Fore.RED + str(msg) + Fore.RESET)	
+def print_bright(msg, end='\n'):
+	print(Style.BRIGHT + str(msg) + Style.RESET_ALL, end=end)
 
-def print_dim(msg):
-	print(Style.DIM + str(msg) + Style.RESET_ALL)
+def print_dim_red(msg, end='\n'):
+	print_dim(Fore.RED + str(msg) + Fore.RESET, end=end)	
+
+def print_dim(msg, end='\n'):
+	print(Style.DIM + str(msg) + Style.RESET_ALL, end=end)
 
 def download_with_progress(url, output_path, expected_size, verbose_output, size_tolerance):
 	class download_progress_bar(tqdm):
@@ -183,6 +192,18 @@ def is_debug() -> bool:
     """Return if the debugger is currently active"""
     return hasattr(sys, 'gettrace') and sys.gettrace() is not None
 
+def merge_modules(modules, output_module_name):
+	new_module = types.ModuleType(output_module_name)
+    
+	for path in modules:
+		module = SourceFileLoader(path, path).load_module()
+		for key, value in vars(module).items():
+			if not key.startswith('__'):
+				setattr(new_module, key, value)
+
+	sys.modules[output_module_name] = new_module
+	return new_module
+
 class percentage_tqdm(tqdm):
 	def __init__(self, iterable=None, total=None, dynamic_ncols=True):
 		tqdm.__init__(
@@ -214,3 +235,25 @@ class chain:
 				self.i = self.i + 1
 
 		raise StopIteration
+	
+class persistent_dict():
+	def __init__(self, path):
+		self.path = path
+	
+	def load(self, key):
+		try:
+			with open(self.path, 'r') as file:
+				return json.load(file).get(key)
+		except (FileNotFoundError, json.decoder.JSONDecodeError):
+			return None
+
+	def store(self, key, value):
+		try:
+			with open(self.path, 'r') as file:
+				data = json.load(file)
+		except (FileNotFoundError, json.decoder.JSONDecodeError):
+			data = {}
+		
+		data[key] = value
+		with open(self.path, 'w') as file:
+			json.dump(data, file, indent=4)

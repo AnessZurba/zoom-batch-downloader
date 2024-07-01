@@ -1,3 +1,5 @@
 ﻿.venv
 config.py
 __pycache__
+refresh_tokens.json
+configs
