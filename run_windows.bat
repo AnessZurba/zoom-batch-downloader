@@ -8,7 +8,6 @@ if %errorlevel% neq 0 (
     for /f "tokens=2*" %%i in ('reg query HKCU\Environment /v PATH ^| find "PATH"') do (
       set PATH=%%j
     )
-
 ) else (
     echo Python 3.12 is installed.
 )

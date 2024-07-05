@@ -63,10 +63,10 @@ If you are using classic scopes then these would be:
     python zoom_batch_downloader.py
     ```
 
-1. (Optional) You can run the app with a custom configuration or override one configuration by fields of another one.
+2. (Optional) You can run the app with a custom configuration or override a configuration by the fields of another one using `--config` parameter
 
    ``` bash
-   python zoom_batch_downloader.py -c config_1.py config_2.py
+   python zoom_batch_downloader.py --config config_1.py config_2.py
    ```
 
 Code written by Georg Kasmin, Lane Campbell and Aness Zurba.
