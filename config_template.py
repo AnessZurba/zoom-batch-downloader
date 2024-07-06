@@ -20,14 +20,14 @@ class oauth: CLIENT_ID: str; CLIENT_SECRET: str; auth_identifier: str
 CREDENTIALS = server_to_server(
     CLIENT_ID = R"############",
     CLIENT_SECRET = R"###########",
-    ACCOUNT_ID = R"############"
+    ACCOUNT_ID = R"############",
 )
 
 # OAUTH Credentials - Uncomment to use.
 # CREDENTIALS = oauth(
 #     CLIENT_ID = R"############",
 #     CLIENT_SECRET = R"############",
-#     auth_identifier = R"############" # user-defined string. Can be left empty if you don't need multiple user/account support.
+#     auth_identifier = R"############", # user-defined string. Can be left empty if you don't need multiple user/account support.
 # )
 
 ########################################################
@@ -40,7 +40,9 @@ START_DAY, START_MONTH, START_YEAR = None, 5, 2020
 END_DAY, END_MONTH, END_YEAR = None, 3, 2022
 
 # Put here emails of the users you want to check for recordings. If empty, all users under the account will be checked.
+# Tip: You can use the string "me" to refer to yourself (Recommended for user-level apps).
 USERS = [
+    # R"me",
     # R"####@####.####",
     # R"####@####.####",
 ]
