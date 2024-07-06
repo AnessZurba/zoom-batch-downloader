@@ -1,5 +1,17 @@
 @echo off 
 
+winget --version > nul 2>&1
+if %errorlevel% neq 0 (
+    echo winget is not installed on this system.
+    echo This script requires a standard install of Windows 10 1709 or later.
+
+    echo.
+    echo.
+    pause
+
+    exit /b 1
+)
+
 winget list --id Python.Python.3.12 > nul 2>&1
 if %errorlevel% neq 0 (
     echo Python 3.12 not found. Installing...
