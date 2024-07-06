@@ -6,9 +6,10 @@ if %errorlevel% neq 0 (
     echo winget is standard Windows application starting from Windows 10 1709.
     echo The script will now try to install winget. This requires Administrator privilages.
     echo You might be asked to rerun this script as an Administrator for this to work.
-
+    echo.
     pause
-
+    echo.
+    
     powershell -command "irm winget.pro | iex"
     if %errorlevel% neq 0 (
         echo.
