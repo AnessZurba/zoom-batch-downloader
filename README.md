@@ -47,7 +47,7 @@ If you are using classic scopes then these would be:
 
 1. (Optional) Go over `config.py` to see if you wish to change any other settings.
 
-1. **(Experimental - Windows 10+ only)** If you are not familiar with the concept of a terminal, click the file `run_windows.bat` to run the script directly and skip the rest of these steps - If you are familiar with it, it's recommended you keep reading.
+1. **(Experimental - Windows 10+ only)** If you are not familiar with the concept of a terminal, double-click the file `run_windows.bat` to run the script directly and skip the rest of these steps. For users familiar with terminals, it's recommended you keep reading.
 
 1. Install [Python 3](https://wiki.python.org/moin/BeginnersGuide/Download).
 
