@@ -28,7 +28,7 @@ This app type can be an account-level or user-level app (Depends on the permissi
 
 ## Required Scopes
 
-These are the scopes your app needs to have in order for the script to work.
+These are the scopes your app needs to have in order for the script to work:
 
 ### For account-level apps (Default choice)
 
