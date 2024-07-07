@@ -233,7 +233,9 @@ def download_recording_file(download_url, user_email, file_name, file_size, topi
 		os.remove(file_path)
 
 	utils.print_bright(f'Downloading: {file_name}')
-	utils.wait_for_disk_space(file_size, CONFIG.OUTPUT_PATH, CONFIG.MINIMUM_FREE_DISK, poll_interval=5)
+	utils.wait_for_disk_space(
+		file_size, CONFIG.OUTPUT_PATH, CONFIG.MINIMUM_FREE_DISK, poll_interval=5, timeout=CONFIG.USER_INPUT_TIMEOUT
+	)
 
 	tmp_file_path = file_path + '.tmp'
 	client.do_with_token(
