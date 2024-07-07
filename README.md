@@ -20,7 +20,7 @@ Recommended for users within an organization where they don't have admin access.
 
 **Important:** When creating the app, be sure to set "Redirect URL for OAuth" and "Add Allow List" to `http://localhost:8000` (You can change the port in the config file if you want).
 
-In this app, the app creator and user can be different. The credentials you get when creating the app are not enough to access the data of your account, and another authentication process will be initiated by the script when using it. You can also autheticate multiple users/accounts using the same app and switch between them using `auth_identifier` in the config file. each `auth_identifier` will have its refresh_token (Basically a temporary password allowing you to access that user resource) in the file `refresh_tokens.json` and will get updated when needed, which might require in some cases a new authentication process by the user.
+In this app, the app creator and user can be different. The credentials you get when creating the app are not enough to access the data of your account, and another authentication process will be initiated by the script when using it. You can also autheticate multiple users/accounts using the same app and switch between them using `auth_identifier` in the config file. Each `auth_identifier` will have its refresh_token (Basically a temporary password allowing you to access that user resource) in the file `refresh_tokens.json` and will get updated when needed, which might require in some cases a new authentication process by the user.
 
 You can read more about the authentication process [here](https://developers.zoom.us/docs/api/rest/using-zoom-apis/).
 
