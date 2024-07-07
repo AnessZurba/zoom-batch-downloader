@@ -1,4 +1,4 @@
-# zoom-batch-downloader
+# Zoom Batch Downloader
 
 Download all your Zoom cloud recordings for accounts with [paid plans](https://zoom.us/pricing#personal).
 
@@ -6,11 +6,13 @@ This script requires [server-to-server app](https://developers.zoom.us/docs/inte
 
 ## Choosing your App type
 
-### Server-to-Server app
+### Server-to-Server app (Default choice)
 
 Recommended for individual users (not part of an organization), or Zoom account admins/owners. The app creation process is straightforward, and the authentication process is seamless once you provide the credentials to the script.
 
 In this app, the app creator and user are always one and the same. The credentials can be used to access data within the account they were created in.
+
+This app type can only be an account-level app.
 
 ### OAuth App (Advanced)
 
@@ -22,18 +24,31 @@ In this app, the app creator and user can be different. The credentials you get 
 
 You can read more about the authentication process [here](https://developers.zoom.us/docs/api/rest/using-zoom-apis/).
 
+This app type can be an account-level or user-level app (Depends on the permissions given to you by your organization).
+
 ## Required Scopes
 
 These are the scopes your app needs to have in order for the script to work.
 
-- `cloud_recording:read:list_user_recordings:admin` or `cloud_recording:read:list_user_recordings` .
-- `cloud_recording:read:list_recording_files:admin` or `cloud_recording:read:list_recording_files`.
+### For account-level apps (Default choice)
+
+- `cloud_recording:read:list_user_recordings:admin`.
+- `cloud_recording:read:list_recording_files:admin`.
 - (Optional) `user:read:list_users:admin`: if you want the script to iterate over all users in the account (default behavior).
 
-If you are using classic scopes then these would be:
+If you are using classic scopes (old behaviour) then these would be:
 
-- `recording:read:admin` or  `recording:read` to download the recordings.
-- `user:read:admin` if you want the script to iterate over all users in the account.
+- `recording:read:admin` to download the recordings.
+- `user:read:admin` to iterate over all users in the account.
+
+### For user-level apps
+
+- `cloud_recording:read:list_user_recordings`.
+- `cloud_recording:read:list_recording_files`.
+
+If you are using classic scopes (old behaviour) then these would be:
+
+- `recording:read`
 
 ## Instructions
 
@@ -63,7 +78,7 @@ If you are using classic scopes then these would be:
     python zoom_batch_downloader.py
     ```
 
-2. (Optional) You can run the app with a custom configuration or override a configuration by the fields of another one using `--config` parameter
+1. (Optional) You can run the app with a custom configuration or override a configuration by the fields of another one using `--config` parameter
 
    ``` bash
    python zoom_batch_downloader.py --config config_1.py config_2.py
