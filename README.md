@@ -50,11 +50,13 @@ If you are using classic scopes (old behaviour) then these would be:
 
 - `recording:read`
 
+**Note:** user-level apps can't access other users' data, so it's recommended that you set the users array in the config file to contain only the string "me". 
+
 ## Instructions
 
-1. Read "Choosing your App type" section above and decide on your application type.
+1. Read [Choosing your App type](#choosing-your-app-type) section above and decide on your application type.
 
-1. [Create](https://marketplace.zoom.us/user/build) your app with the needed scopes and activate it (no need to publish).
+1. [Create](https://marketplace.zoom.us/user/build) your app with the [required scopes](#required-scopes) and activate it (no need to publish).
 
 1. Clone/[Download](https://github.com/AnessZurba/zoom-batch-downloader/archive/refs/heads/master.zip) this repository.
 
