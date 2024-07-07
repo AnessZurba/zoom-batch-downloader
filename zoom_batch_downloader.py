@@ -66,11 +66,7 @@ def main():
 	utils.print_bright(f'Using {client.credentials_description()}.')
 	print_filter_warnings()
 
-	from_date = datetime.datetime(CONFIG.START_YEAR, CONFIG.START_MONTH, CONFIG.START_DAY or 1)
-	to_date = datetime.datetime(
-		CONFIG.END_YEAR, CONFIG.END_MONTH, CONFIG.END_DAY or monthrange(CONFIG.END_YEAR, CONFIG.END_MONTH)[1],
-	)
-
+	from_date, to_date = evaluate_dates()
 	file_count, total_size, skipped_count = download_recordings(get_users(), from_date, to_date)
 
 	total_size_str = utils.size_to_string(total_size)
@@ -96,6 +92,22 @@ def print_filter_warnings():
 		
 	if did_print:
 		print()
+
+def evaluate_dates():
+	from_date = datetime.datetime(CONFIG.START_YEAR or 2012, CONFIG.START_MONTH or 1, CONFIG.START_DAY or 1)
+
+	now = datetime.datetime.now()
+
+	if (CONFIG.END_YEAR, CONFIG.END_MONTH, CONFIG.END_DAY) == (None, None, None):
+		end_year, end_month, end_day = now.year, now.month, now.day
+	else:
+		end_year = CONFIG.END_YEAR or now.year
+		end_month = CONFIG.END_MONTH or 12
+		end_day = CONFIG.END_DAY or monthrange(end_year, end_month)[1]
+
+	to_date = datetime.datetime(end_year, end_month, end_day)
+
+	return from_date, to_date
 
 def get_users():
 	if CONFIG.USERS:
@@ -147,7 +159,7 @@ def get_user_description(user_email, user_name):
 	return f'{user_email} ({user_name})' if (user_name) else user_email
 	
 def date_to_str(date):
-	return date.strftime('%Y-%m-%d')
+	return date.strftime('%d/%m/%Y')
 
 def get_meeting_uuids(user_email, start_date, end_date):
 	meeting_uuids = []

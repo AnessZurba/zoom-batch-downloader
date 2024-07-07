@@ -35,9 +35,10 @@ CREDENTIALS = server_to_server(
 # Put your own download path here, no need to escape backslashes but avoid ending with one.
 OUTPUT_PATH = R"C:\Test\Zoom"
 
-# Date range (inclusive) for downloads, None value for Days gets replaced by first/last day of the month.
+# Date range (inclusive) for downloads, None values get replaced by their respective min/max values.
+# Setting End date to None, None, None will set the end date to today.
 START_DAY, START_MONTH, START_YEAR = None, 5, 2020
-END_DAY, END_MONTH, END_YEAR = None, 3, 2022
+END_DAY, END_MONTH, END_YEAR = None, None, None
 
 # Put here emails of the users you want to check for recordings. If empty, all users under the account will be checked.
 # Tip: You can use the string "me" to refer to yourself (Recommended for user-level apps).
