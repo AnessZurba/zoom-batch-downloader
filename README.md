@@ -8,7 +8,7 @@ This script requires [server-to-server app](https://developers.zoom.us/docs/inte
 
 ### Server-to-Server app (Default choice)
 
-Recommended for individual users (not part of an organization), or Zoom account admins/owners. The app creation process is straightforward, and the authentication process is seamless once you provide the credentials to the script.
+**Recommended for individual users (not part of an organization), or Zoom account admins/owners.** The app creation process is straightforward, and the authentication process is seamless once you provide the credentials to the script.
 
 In this app, the app creator and user are always one and the same. The credentials can be used to access data within the account they were created in.
 
@@ -16,7 +16,7 @@ This app type can only be an account-level app.
 
 ### OAuth App (Advanced)
 
-Recommended for users within an organization where they don't have admin access.
+**Recommended for users within an organization where they don't have admin access.**
 
 **Important:** When creating the app, be sure to set "Redirect URL for OAuth" and "Add Allow List" to `http://localhost:8000` (You can change the port in the config file if you want).
 
@@ -36,19 +36,27 @@ These are the scopes your app needs to have in order for the script to work:
 - `cloud_recording:read:list_recording_files:admin`.
 - (Optional) `user:read:list_users:admin`: if you want the script to iterate over all users in the account (default behavior).
 
-If you are using classic scopes (old behaviour) then these would be:
+<details>
+<summary>Classic Scopes (Deprecated)</summary>
 
 - `recording:read:admin` to download the recordings.
 - `user:read:admin` to iterate over all users in the account.
+  
+</details>
+
+
 
 ### For user-level apps
 
 - `cloud_recording:read:list_user_recordings`.
 - `cloud_recording:read:list_recording_files`.
 
-If you are using classic scopes (old behaviour) then these would be:
+<details>
+<summary>Classic Scopes (Deprecated)</summary>
 
 - `recording:read`
+
+</details>
 
 **Note:** user-level apps can't access other users' data, so it's recommended that you set the users array in the config file to contain only the string "me". 
 
