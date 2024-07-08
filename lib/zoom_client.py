@@ -98,6 +98,7 @@ class zoom_client:
 		
 		if self.verbose_output and 'scope' in response:
 			utils.print_dim(f'Got token with scope: {response["scope"]}.')
+			utils.print_dim('')
 			
 		return response['access_token']  
 	
