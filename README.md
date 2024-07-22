@@ -10,9 +10,9 @@ This script requires [server-to-server app](https://developers.zoom.us/docs/inte
 
 **Recommended for admins/owners of paid Zoom accounts.** The app creation process is straightforward, and the authentication process is seamless once you provide the credentials to the script.
 
-In this app, the app creator and user are always one and the same. The credentials can be used to access data within the account they were created in.
+With this app type, the app creator and user are always one and the same. The credentials can be used to access data within the account they were created in.
 
-This app type can only be an account-level app.
+This app type can only be used for an account-level app - thus the recommendation above.
 
 ### OAuth App (Advanced)
 
@@ -20,11 +20,11 @@ This app type can only be an account-level app.
 
 **Important:** When creating the app, be sure to set "Redirect URL for OAuth" and "Add Allow List" to `http://localhost:8000` (You can change the port in the config file if you want).
 
-In this app, the app creator and user can be different. The credentials you get when creating the app are not enough to access the data of your account, and another authentication process will be initiated by the script when using it. You can also autheticate multiple users/accounts using the same app and switch between them using `auth_identifier` in the config file. Each `auth_identifier` will have its refresh_token (Basically a temporary password allowing you to access that user resource) in the file `refresh_tokens.json` and will get updated when needed, which might require in some cases a new authentication process by the user.
+With this app type, the app creator and user can be different. The credentials you get when creating the app are not enough to access the data of your account, and another authentication process will be initiated by the script when using it. You can also autheticate multiple users/accounts using the same app and switch between them using `auth_identifier` in the config file. Each `auth_identifier` will have its refresh_token (Basically a temporary password allowing you to access that user resource) in the file `refresh_tokens.json` and will get updated when needed, which might require in some cases a new authentication process by the user.
 
 You can read more about the authentication process [here](https://developers.zoom.us/docs/api/rest/using-zoom-apis/).
 
-This app type can be an account-level or user-level app (Depends on the permissions given to you by your organization).
+This app type can be used for an account-level or user-level app (Depends on the permissions given to you by your organization).
 
 ## Required Scopes
 
