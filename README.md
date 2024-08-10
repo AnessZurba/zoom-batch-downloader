@@ -64,7 +64,7 @@ These are the scopes your app needs to have in order for the script to work:
 
 1. [Create](https://marketplace.zoom.us/user/build) your app with the [required scopes](#required-scopes) and activate it (no need to publish).
 
-1. Clone/[Download](https://github.com/AnessZurba/zoom-batch-downloader/archive/refs/heads/master.zip) this repository.
+1. Clone/[Download](../../archive/refs/heads/master.zip) this repository.
 
 1. Copy `config_template.py` to a new file called `config.py` in the same directory and edit it to include your credentials. In addition to the target path and date range for your recording downloads.
 
