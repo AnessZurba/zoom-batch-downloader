@@ -14,7 +14,7 @@ With this app type, the app creator and user are always one and the same. The cr
 
 This app type can only be used for an account-level app - thus the recommendation above.
 
-### OAuth App (Advanced)
+### General App (Advanced)
 
 **Recommended for users with free accounts, or those within an organization where they don't have admin access.**
 
