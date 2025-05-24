@@ -2,7 +2,7 @@
 
 Download your Zoom cloud recordings.
 
-This script requires [server-to-server app](https://developers.zoom.us/docs/internal-apps/create/)/[oauth app](https://developers.zoom.us/docs/integrations/create/) credentials from [Zoom App Marketplace](https://marketplace.zoom.us/user/build). There is no need to publish any apps to the marketplace. All usage of the app will be through the credentials you get from Zoom website and provide to the script.
+This script requires [server-to-server app](https://developers.zoom.us/docs/internal-apps/create/)/[general app](https://developers.zoom.us/docs/integrations/create/) credentials from [Zoom App Marketplace](https://marketplace.zoom.us/user/build). There is no need to publish any apps to the marketplace. All usage of the app will be through the credentials you get from Zoom website and provide to the script.
 
 ## Choosing your App type
 
